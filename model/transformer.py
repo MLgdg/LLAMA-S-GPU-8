@@ -4,7 +4,8 @@ import torch.nn.functional as F
 from torch import nn
 from mask import PadMasking, FutureMasking
 from trick import RMSNorm as LayerNorm
-
+from tricl import FeedForward
+from text_embedding import TextEmbeddings
 
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
@@ -26,7 +27,7 @@ class ResidualAttentionBlock(nn.Module):
         super().__init__()
         self.attn = nn.MultiheadAttention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
-        self.mlp = FeedForward(d_model)
+        self.mlp = FeedForward(d_model, 4*d_model)
         self.ln_2 = LayerNorm(d_model)
         #self.attn_mask = attn_mask
     def attention(self, x, attn_mask=None):
@@ -48,3 +49,34 @@ class Transformer(nn.Module):
         
     def forward(self, x, attn_mask=None):
         return self.resblocks(x, attn_mask=None)
+
+class LLAMAHead(nn.Module):
+    def __init__(self, model_embeddings_weights):
+        super(LLAMAHead, self).__init__()
+        self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
+        self.set_embeddings_weights(model_embeddings_weights)
+
+    def set_embeddings_weights(self, model_embeddings_weights):
+        embed_shape = model_embeddings_weights.shape
+        self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
+        self.decoder.weight = model_embeddings_weights  # Tied weights
+    def forward(self, x):
+        lm_logits = self.decoder(hidden_state)
+        return lm_logits
+
+class LLAMA(nn.Module):
+    def __init__(self, config, model_embeddings_weights)
+        super().__init__()
+        self.E = TextEmbeddings(config)
+        self.T = Transformer(config.hidden_size, config.num_hidden_layers, config.num_attention_heads)
+        self.H = LLAMAHead(self.E.word_embeddings.weight)
+        self.H.set_embeddings_weights(self.E.word_embeddings.weight)
+    def forward(self, token):
+        out = self.E(token)
+        out = self.T(out)
+        out = self.H(out)
+        return out, out[:, -1, :]
+
+
+
+
