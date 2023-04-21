@@ -6,7 +6,6 @@ from mask import PadMasking, FutureMasking
 from trick import RMSNorm as LayerNorm
 from tricl import FeedForward
 from text_embedding import TextEmbeddings
-
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
@@ -73,7 +72,9 @@ class LLAMA(nn.Module):
         self.H.set_embeddings_weights(self.E.word_embeddings.weight)
     def forward(self, token):
         out = self.E(token)
+        out = out.permute(1, 0, 2)  # NLD -> LND
         out = self.T(out)
+        out = out.permute(1, 0, 2)
         out = self.H(out)
         return out, out[:, -1, :]
 

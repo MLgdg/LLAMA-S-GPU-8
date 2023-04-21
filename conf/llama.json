@@ -7,6 +7,7 @@
   "num_attention_heads": 64,
   "num_hidden_layers": 80,
   "vocab_size": 21128,
+  "gpulsit":[0,1,2,3,4,5,6,7],
   "label2id": "./dataset/label2id_category.json",
   "root_path": "./dataset/"
 }
