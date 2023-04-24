@@ -10,16 +10,16 @@ class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
 
-class FeedForward(nn.Module):
+# class FeedForward(nn.Module):
 
-    def __init__(self, d_model):
-        super().__init__()
-        self.l1 = nn.Linear(d_model, d_model * 4)
-        self.ac = QuickGELU()
-        self.l2 = nn.Linear(d_model * 4, d_model)
+#     def __init__(self, d_model):
+#         super().__init__()
+#         self.l1 = nn.Linear(d_model, d_model * 4)
+#         self.ac = QuickGELU()
+#         self.l2 = nn.Linear(d_model * 4, d_model)
 
-    def forward(self, x):
-        return self.l2(self.ac(self.l1(x)))
+#     def forward(self, x):
+#         return self.l2(self.ac(self.l1(x)))
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model, n_head):

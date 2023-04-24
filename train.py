@@ -9,11 +9,13 @@ import json
 from model.llama import LLAMA
 from dataset import dataset
 from optimizer import opt
+from conf.config import DictToClass
 epoch = 100
 CUDA=0
 loss_base = 1
 print_f = 20
-cfg = json.loads('.conf/llama.json')
+cfg = json.load(open('./conf/llama.json'))
+cfg = DictToClass(cfg)
 llama = LLAMA(cfg)
 loss_fn = torch.nn.CrossEntropyLoss(ignore_index=0)
 traindata = torch.utils.data.DataLoader(dataset.TextData('./dongtai_v2tov4',cfg), batch_size=256,shuffle=True,num_workers=0,collate_fn=dataset.collate_fn,drop_last=True)
