@@ -1,9 +1,9 @@
-from transformer import Transformer, LLAMAHead
-from gpus import GPUs
-from text_embedding import TextEmbeddings
-
+from model.transformer import Transformer, LLAMAHead
+from model.gpus import GPUs
+from model.text_embedding import TextEmbeddings
+import torch.nn as nn
 class LLAMA(nn.Module):
-    def __init__(self, config)
+    def __init__(self, config):
         super().__init__()
         self.E = TextEmbeddings(config).cuda(config.gpulsit[0])
         T = Transformer(config.hidden_size, config.num_hidden_layers, config.num_attention_heads)

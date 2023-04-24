@@ -1,6 +1,5 @@
 
 import model
-import config
 import torch
 import dataset
 import time
@@ -26,7 +25,7 @@ for j in range(epoch):
     for i, data in enumerate(traindata):
         opt.zero_grad()
         s2 = time.time()
-  		s3 = s2
+        s3 = s2
         input_ids = data['input_ids'].cuda(cfg.gpulsit[0])
         label_ids = data['label_ids'].cuda(cfg.gpulsit[-1])
         try:

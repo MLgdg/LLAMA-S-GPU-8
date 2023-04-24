@@ -2,8 +2,8 @@
 import torch 
 import torch.nn as nn
 
-from transformer import Transformer, LLAMAHead
-from text_embedding import TextEmbeddings
+from model.transformer import Transformer, LLAMAHead
+from model.text_embedding import TextEmbeddings
 
 GPU = [0,1,2,3,4,5,6,7]
 
@@ -24,7 +24,7 @@ class GPUs(nn.Module):
 				x = self.model[i](x.cuda(self.model_gpu[i]))
 		else:
 			for i in range(len(self.model_gpu)):
-				x = self.model[i](x.cuda(self.model_gpu[i]), attn_mask.cuda((self.model_gpu[i]))
+				x = self.model[i](x.cuda(self.model_gpu[i]), attn_mask.cuda(self.model_gpu[i]))
 
 
 

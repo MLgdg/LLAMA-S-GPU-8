@@ -7,8 +7,8 @@ import torch
 from torch import nn
 #from apex.normalization.fused_layer_norm import FusedLayerNorm
 #from torch.nn import LayerNorm 
-from trick import RMSNorm as LayerNorm
-from mask import PadMasking, FutureMasking
+from model.trick import RMSNorm as LayerNorm
+from model.mask import PadMasking, FutureMasking
 
 class TextEmbeddings(nn.Module):
     def __init__(self, config):

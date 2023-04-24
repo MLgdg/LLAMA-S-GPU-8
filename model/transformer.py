@@ -2,10 +2,10 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
-from mask import PadMasking, FutureMasking
-from trick import RMSNorm as LayerNorm
-from tricl import FeedForward
-from text_embedding import TextEmbeddings
+from model.mask import PadMasking, FutureMasking
+from model.trick import RMSNorm as LayerNorm
+from model.trick import FeedForward
+from model.text_embedding import TextEmbeddings
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
@@ -64,7 +64,7 @@ class LLAMAHead(nn.Module):
         return lm_logits
 
 class LLAMA(nn.Module):
-    def __init__(self, config, model_embeddings_weights)
+    def __init__(self, config, model_embeddings_weights):
         super().__init__()
         self.E = TextEmbeddings(config)
         self.T = Transformer(config.hidden_size, config.num_hidden_layers, config.num_attention_heads)

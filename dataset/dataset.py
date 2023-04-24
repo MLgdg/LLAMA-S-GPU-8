@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
-import tokenization
+import dataset.tokenization as tokenization
 
 
 def collate_fn(batch):
@@ -38,7 +38,7 @@ class TextData(Dataset):
                     pass
         self.tokener = tokenization.BertTokenizer('./vocab.txt')
     def __getitem__(self, index):
-        data = self.tokener.encode(self.data[index])[:(self.config.n_positions-2)]
+        data = self.tokener.encode(self.data[index])[:(self.config.max_position_embeddings-2)]
         data = [101] + data + [102]
         input_ids = data[:-1]
         label_ids = data[1:]
