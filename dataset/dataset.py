@@ -36,7 +36,7 @@ class TextData(Dataset):
                     self.data.append(data)
                 except:
                     pass
-        self.tokener = tokenization.BertTokenizer('./vocab.txt')
+        self.tokener = tokenization.BertTokenizer('./dataset/vocab.txt')
     def __getitem__(self, index):
         data = self.tokener.encode(self.data[index])[:(self.config.max_position_embeddings-2)]
         data = [101] + data + [102]

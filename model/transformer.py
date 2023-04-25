@@ -52,6 +52,7 @@ class Transformer(nn.Module):
 class LLAMAHead(nn.Module):
     def __init__(self, model_embeddings_weights):
         super(LLAMAHead, self).__init__()
+        embed_shape = model_embeddings_weights.shape
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
         self.set_embeddings_weights(model_embeddings_weights)
 

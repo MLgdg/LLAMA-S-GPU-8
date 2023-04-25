@@ -5,7 +5,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
 def opt(params):
-	opt = troch.optim.AdamW(lr=1.5e-4, betas=(0.9, 0.95), weight_decay=0.1)
+	opt = torch.optim.AdamW(params, lr=1.5e-4, betas=(0.9, 0.95), weight_decay=0.1)
 	scheduler = CosineAnnealingLR(optimizer=opt, T_max=20000, eta_min=1e-6)
 	#lr_history = scheduler_lr(opt, scheduler)
 	return opt, scheduler
