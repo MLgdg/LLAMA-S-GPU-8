@@ -24,18 +24,18 @@ class QuickGELU(nn.Module):
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model, n_head):
         super().__init__()
-        self.attn = nn.MultiheadAttention(d_model, n_head)
+        self.attn = nn.MultiheadAttention(d_model, n_head, batch_first=True)
         self.ln_1 = LayerNorm(d_model)
         self.mlp = FeedForward(d_model, 4*d_model)
         self.ln_2 = LayerNorm(d_model)
         #self.attn_mask = attn_mask
-    def attention(self, x, attn_mask=None):
+    def attention(self, x, pad_mask=None, causal_mask=None):
 
         #self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=False, attn_mask=attn_mask)[0]
+        return self.attn(x, x, x, need_weights=False, key_padding_mask=pad_mask, attn_mask=causal_mask)[0]
 
-    def forward(self, x, attn_mask=None):
-        x = x + self.attention(self.ln_1(x), attn_mask)
+    def forward(self, x, pad_mask=None, causal_mask=None):
+        x = x + self.attention(self.ln_1(x), pad_mask, causal_mask)
         x = x + self.mlp(self.ln_2(x))
         return x
 
@@ -46,8 +46,8 @@ class Transformer(nn.Module):
         self.layers = layers#80
         self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads) for _ in range(layers)])
         
-    def forward(self, x, attn_mask=None):
-        return self.resblocks(x, attn_mask=None)
+    def forward(self, x, pad_mask=None, causal_mask=None):
+        return self.resblocks(x, pad_mask=None, causal_mask=None)
 
 class LLAMAHead(nn.Module):
     def __init__(self, model_embeddings_weights):
@@ -61,23 +61,8 @@ class LLAMAHead(nn.Module):
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
         self.decoder.weight = model_embeddings_weights  # Tied weights
     def forward(self, x):
-        lm_logits = self.decoder(hidden_state)
+        lm_logits = self.decoder(x)
         return lm_logits
-
-class LLAMA(nn.Module):
-    def __init__(self, config, model_embeddings_weights):
-        super().__init__()
-        self.E = TextEmbeddings(config)
-        self.T = Transformer(config.hidden_size, config.num_hidden_layers, config.num_attention_heads)
-        self.H = LLAMAHead(self.E.word_embeddings.weight)
-        self.H.set_embeddings_weights(self.E.word_embeddings.weight)
-    def forward(self, token):
-        out = self.E(token)
-        out = out.permute(1, 0, 2)  # NLD -> LND
-        out = self.T(out)
-        out = out.permute(1, 0, 2)
-        out = self.H(out)
-        return out, out[:, -1, :]
 
 
 

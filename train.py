@@ -41,7 +41,8 @@ for j in range(epoch):
         loss = loss_fn(out.view(-1, out.size(-1)), label_ids.view(-1))
         #print(123)
         loss.backward()
-        nn.utils.clip_grad_norm_(llama.parameters(), max_norm=5, norm_type=2)
+        nn.utils.clip_grad_norm_(llama.parameters(), max_norm=1, norm_type=2)
+        
         opt.step()
         scheduler.step()
         s5 = time.time()

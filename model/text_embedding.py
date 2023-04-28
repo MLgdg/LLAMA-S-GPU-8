@@ -26,7 +26,8 @@ class TextEmbeddings(nn.Module):
         #    token_type_ids = torch.zeros_like(input_ids)
         position_ids = torch.arange(0, input_ids.size(1), dtype=torch.long
                                     ).unsqueeze(0).repeat(input_ids.size(0),1).to(input_ids.device)
-        text_attn_masks = self.pmask(input_ids) + self.tmask(input_ids)
+        text_pad_masks = self.pmask(input_ids)# + self.tmask(input_ids)
+        text_causal_mask = self.tmask(input_ids)
         words_embeddings = self.word_embeddings(input_ids)
         position_embeddings = self.position_embeddings(position_ids)
         #token_type_embeddings = self.token_type_embeddings(token_type_ids)
@@ -34,7 +35,7 @@ class TextEmbeddings(nn.Module):
         embeddings = (words_embeddings + position_embeddings)
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
-        return embeddings, text_attn_masks
+        return embeddings, text_pad_masks, text_causal_mask
 if __name__ == '__main__':
     import sys
     sys.path.append('../')

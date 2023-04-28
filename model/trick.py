@@ -15,6 +15,7 @@ class RMSNorm(torch.nn.Module):
         return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 
     def forward(self, x):
+        
         output = self._norm(x.float()).type_as(x)
         return output * self.weight
 
@@ -26,7 +27,7 @@ class FeedForward(nn.Module):
         hidden_dim = multiple_of * ((hidden_dim + multiple_of - 1) // multiple_of)
 
         self.w1 = nn.Linear(dim, hidden_dim)
-        self.w2 = nn.Linear(dim, hidden_dim)
+        self.w2 = nn.Linear(hidden_dim, dim)
         self.w3 = nn.Linear(dim, hidden_dim)
 
     def forward(self, x):

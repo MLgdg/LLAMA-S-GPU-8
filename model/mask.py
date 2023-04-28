@@ -15,7 +15,7 @@ class PadMasking(nn.Module):
         is_pad = (x == self.pad_idx).unsqueeze(-2)
         shifted = torch.zeros(x.size()[:-1] + (1, 0,),
                               dtype=torch.bool, device=x.device)
-
+        
         mask = torch.cat((shifted, is_pad), dim=-1)
         return mask.expand(x.shape + mask.shape[-1:])
 
