@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 import dataset.tokenization as tokenization
-
+import json 
 
 def collate_fn(batch):
     input_ids = []
@@ -32,14 +32,16 @@ class TextData(Dataset):
             for ll in ff:
                 #print(ll)
                 try:
-                    data = ll.strip().split('\t')[1]
-                    self.data.append(data)
+                    data = json.loads(ll.strip()).get('content','')
+                    for line in data.split('。'):
+                        if line:
+                            self.data.append(data)
                 except:
                     pass
         self.tokener = tokenization.BertTokenizer('./dataset/vocab.txt')
     def __getitem__(self, index):
         data = self.tokener.encode(self.data[index])[:(self.config.max_position_embeddings-2)]
-        data = [101] + data + [102]
+        data = [101] + data + [105]
         input_ids = data[:-1]
         label_ids = data[1:]
         return {'input_ids': input_ids, 'label_ids': label_ids}
