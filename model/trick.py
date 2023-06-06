@@ -15,7 +15,7 @@ class RMSNorm(torch.nn.Module):
         return x * torch.rsqrt(x.pow(2).mean(-1, keepdim=True) + self.eps)
 
     def forward(self, x):
-        
+        #print(x.device, self.weight.device)
         output = self._norm(x.float()).type_as(x)
         return output * self.weight
 

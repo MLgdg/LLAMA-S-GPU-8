@@ -6,36 +6,30 @@ from model.mask import PadMasking, FutureMasking
 from model.trick import RMSNorm as LayerNorm
 from model.trick import FeedForward
 from model.text_embedding import TextEmbeddings
+from model.attention import Attention
+from conf.config import DictToClass
+import fairscale
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
 
-# class FeedForward(nn.Module):
 
-#     def __init__(self, d_model):
-#         super().__init__()
-#         self.l1 = nn.Linear(d_model, d_model * 4)
-#         self.ac = QuickGELU()
-#         self.l2 = nn.Linear(d_model * 4, d_model)
-
-#     def forward(self, x):
-#         return self.l2(self.ac(self.l1(x)))
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model, n_head):
         super().__init__()
-        self.attn = nn.MultiheadAttention(d_model, n_head, batch_first=True)
+        self.attn = Attention(d_model, n_head)
         self.ln_1 = LayerNorm(d_model)
         self.mlp = FeedForward(d_model, 4*d_model)
         self.ln_2 = LayerNorm(d_model)
         #self.attn_mask = attn_mask
-    def attention(self, x, pad_mask=None, causal_mask=None):
+    def attention(self, x, mask=None, USE="TRAIN"):
 
         #self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, x, x, need_weights=False, key_padding_mask=pad_mask, attn_mask=causal_mask)[0]
+        return self.attn(x, mask, USE)
 
-    def forward(self, x, pad_mask=None, causal_mask=None):
-        x = x + self.attention(self.ln_1(x), pad_mask, causal_mask)
+    def forward(self, x, mask=None, USE="TRAIN"):
+        x = x + self.attention(self.ln_1(x), mask, USE) 
         x = x + self.mlp(self.ln_2(x))
         return x
 
@@ -46,12 +40,12 @@ class Transformer(nn.Module):
         self.layers = layers#80
         self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads) for _ in range(layers)])
         
-    def forward(self, x, pad_mask=None, causal_mask=None):
-        return self.resblocks(x, pad_mask=None, causal_mask=None)
+    def forward(self, x, mask=None, USE="TRAIN"):
+        return self.resblocks(x, mask, USE)
 
-class LLAMAHead(nn.Module):
+class FUCKHead(nn.Module):
     def __init__(self, model_embeddings_weights):
-        super(LLAMAHead, self).__init__()
+        super(FUCKHead, self).__init__()
         embed_shape = model_embeddings_weights.shape
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
         self.set_embeddings_weights(model_embeddings_weights)
@@ -63,6 +57,8 @@ class LLAMAHead(nn.Module):
     def forward(self, x):
         lm_logits = self.decoder(x)
         return lm_logits
+
+
 
 
 class LLAMA(nn.Module):
@@ -81,13 +77,15 @@ class LLAMA(nn.Module):
         self.H = H#.cuda(config.gpulsit[-1])
     def forward(self, token):
 
-        out, pad_mask, causal_mask= self.E(token)
+        out, mask= self.E(token)
         #print("embed shape", out.shape)
         #out = out.permute(1, 0, 2)  # NLD -> LND
-        out = self.T(out, pad_mask, causal_mask)
+        out = self.T(out, mask)
         #out = out.permute(1, 0, 2)
 
         out = self.H(out)
-        return out, out[:, -1, :]
-
+if __name__=="__main__":
+    cfg = json.load(open('./conf/llama.json'))
+    cfg = DictToClass(cfg)
+    llama = LLAMA(cfg)
 
