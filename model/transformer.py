@@ -9,11 +9,17 @@ from model.text_embedding import TextEmbeddings
 from model.attention import Attention
 from conf.config import DictToClass
 import fairscale
+
 class QuickGELU(nn.Module):
     def forward(self, x: torch.Tensor):
         return x * torch.sigmoid(1.702 * x)
-
-
+#TODO
+"""
+0、输入由原来的mask 改为seq_len,
+1、输出序列的长度
+2、在内部进行mask计算
+3、修改mask实现代码
+"""
 
 class ResidualAttentionBlock(nn.Module):
     def __init__(self, d_model, n_head):
@@ -23,15 +29,15 @@ class ResidualAttentionBlock(nn.Module):
         self.mlp = FeedForward(d_model, 4*d_model)
         self.ln_2 = LayerNorm(d_model)
         #self.attn_mask = attn_mask
-    def attention(self, x, mask=None, USE="TRAIN"):
+    def attention(self, x, mask=None):
 
         #self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
-        return self.attn(x, mask, USE)
+        return self.attn(x, mask)
 
-    def forward(self, x, mask=None, USE="TRAIN"):
-        x = x + self.attention(self.ln_1(x), mask, USE) 
+    def forward(self, x, mask=None):
+        x = x + self.attention(self.ln_1(x), mask) 
         x = x + self.mlp(self.ln_2(x))
-        return x
+        return (x, mask)
 
 class Transformer(nn.Module):
     def __init__(self, width, layers, heads=64):

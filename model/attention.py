@@ -18,8 +18,6 @@ class Attention(nn.Module):
         self.c_attn = nn.Linear(dim, dim*3)
         self.c_proj = nn.Linear(dim, dim)
         self.dropout = nn.Dropout(dropout)
-        self.k = None
-        self.v = None
     def _attn(self, q, k, v, mask):
         w = torch.matmul(q, k)
         if self.scale:
@@ -51,23 +49,12 @@ class Attention(nn.Module):
         else:
             return x.permute(0, 2, 1, 3)  # (batch, head, seq_length, head_features)
 
-    def forward(self, x, mask=None, USE="TRAIN"):
+    def forward(self, x, mask=None):
         x = self.c_attn(x)
         query, key, value = x.split(self.split_size, dim=2)
         query = self.split_heads(query)
         key = self.split_heads(key, k=True)
         value = self.split_heads(value)
-        if UES != "TRAIN":
-            if self.k:
-                key = torch.cat((self.k, key), dim=-1)
-                self.k = key
-            else:
-                self.k = key
-            if self.v:
-                value = torch.cat((self.v, value), dim=-2)
-                self.v = value
-            else:
-                self.v = value
         a = self._attn(query, key, value, mask)
         a = self.merge_heads(a)
         a = self.c_proj(a)

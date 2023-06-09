@@ -28,7 +28,7 @@ class PadMasking(nn.Module):
 class FutureMasking(nn.Module):
 
     def forward(self, x):
-        seq_len = x.size(-1)
+        seq_len = max(x)
 
         # Create shifted upper triangular matrix.
         future =  torch.full((seq_len, seq_len), float("-inf"),
