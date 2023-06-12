@@ -29,12 +29,14 @@ class ResidualAttentionBlock(nn.Module):
         self.mlp = FeedForward(d_model, 4*d_model)
         self.ln_2 = LayerNorm(d_model)
         #self.attn_mask = attn_mask
+
     def attention(self, x, mask=None):
 
         #self.attn_mask = self.attn_mask.to(dtype=x.dtype, device=x.device) if self.attn_mask is not None else None
         return self.attn(x, mask)
 
-    def forward(self, x, mask=None):
+    def forward(self, data):
+        x, mask = data
         x = x + self.attention(self.ln_1(x), mask) 
         x = x + self.mlp(self.ln_2(x))
         return (x, mask)
@@ -46,8 +48,8 @@ class Transformer(nn.Module):
         self.layers = layers#80
         self.resblocks = nn.Sequential(*[ResidualAttentionBlock(width, heads) for _ in range(layers)])
         
-    def forward(self, x, mask=None, USE="TRAIN"):
-        return self.resblocks(x, mask, USE)
+    def forward(self, x, mask=None):
+        return self.resblocks(x, mask)
 
 class FUCKHead(nn.Module):
     def __init__(self, model_embeddings_weights):
@@ -60,7 +62,8 @@ class FUCKHead(nn.Module):
         embed_shape = model_embeddings_weights.shape
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
         self.decoder.weight = model_embeddings_weights  # Tied weights
-    def forward(self, x):
+    def forward(self, data):
+        x, mask = data
         lm_logits = self.decoder(x)
         return lm_logits
 

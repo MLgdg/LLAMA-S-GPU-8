@@ -21,7 +21,7 @@ class TextEmbeddings(nn.Module):
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.pmask = PadMasking(pad_idx=0)
         self.tmask = FutureMasking()
-    def forward(self, input_ids, token_type_ids=None):
+    def forward(self, input_ids):
         #if token_type_ids is None:
         #    token_type_ids = torch.zeros_like(input_ids)
         position_ids = torch.arange(0, input_ids.size(1), dtype=torch.long
@@ -35,7 +35,7 @@ class TextEmbeddings(nn.Module):
         embeddings = (words_embeddings + position_embeddings)
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
-        return embeddings, masks
+        return (embeddings, masks)
 if __name__ == '__main__':
     import sys
     sys.path.append('../')
