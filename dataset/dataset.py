@@ -31,6 +31,8 @@ def collate_fn(batch):
         input_ids.append(input_id)
         label_ids.append(label_id)
     return {'input_ids': torch.tensor(input_ids), 'label_ids': torch.tensor(label_ids)}
+def predata(tokenize, data):
+    
         
 class TextData(Dataset):
 
