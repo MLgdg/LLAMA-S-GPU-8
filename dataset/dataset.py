@@ -26,12 +26,16 @@ def collate_fn(batch):
     for i in batch:
         input_id = i['input_ids']
         label_id = i['label_ids']
-        input_id = input_id + [0] * (length - len(input_id))
-        label_id = label_id + [0] * (length - len(label_id))
+        input_id = input_id + [3] * (length - len(input_id))
+        label_id = label_id + [3] * (length - len(label_id))
         input_ids.append(input_id)
         label_ids.append(label_id)
     return {'input_ids': torch.tensor(input_ids), 'label_ids': torch.tensor(label_ids)}
 def predata(tokenize, data):
+    
+    data = tokener.tokenize(data, add_dummy_prefix=False) 
+
+
     
         
 class TextData(Dataset):
@@ -47,18 +51,17 @@ class TextData(Dataset):
                 #print(ll)
                 try:
                     data = json.loads(ll.strip()).get('content','')
-                    for line in data.split('。'):
-                        if line:
-                            self.data.append(data)
+                    # for line in data.split('。'):
+                    #     if line:
+                    self.data.append(data)
                 except:
                     pass
         self.tokener = tokenization.SPTokenizer('./dataset/ice_text.model')
     def __getitem__(self, index):
         text = self.data[index]
-        b=tokener.tokenize(text,add_dummy_prefix=False) 
-        
-        data = self.tokener.encode(self.data[index])[:(self.config.max_position_embeddings-2)]
-        data = [101] + data + [105]
+        b = self.tokener.tokenize(text,add_dummy_prefix=False) 
+        b = self.tokener.convert_tokens_to_ids(b) 
+        data = b[: self.config.max_position_embeddings+1]
         input_ids = data[:-1]
         label_ids = data[1:]
         return {'input_ids': input_ids, 'label_ids': label_ids}

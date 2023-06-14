@@ -4,7 +4,7 @@ import sentencepiece as spm
 tokener = tokenization.SPTokenizer('./ice_text.model')
 tokener2 = tokenization.TextTokenizer('./ice_text.model')
 
-a = "徐某、王某民均为聋哑人。2019年1月，被告王某民以急需要资金周转为由，向原告徐某借款2万元，并承诺原告啥时候用钱啥时候还。后原告急需用钱时，经多次催要被告偿还部分借款后，尚欠原告1万元一直没有偿还，徐某于今年2月向法院提起诉讼。"
+a = "徐\n某、王某民均为聋哑人。2019年1月，被告王某民以急需要资金周转为由，向原告徐某借款2万元，并承诺原告啥时候用钱啥时候还。后原告急需用钱时，经多次催要被告偿还部分借款后，尚欠原告1万元一直没有偿还，徐某于今年2月向法院提起诉讼。"
 #print(tokener2.convert_tokens_to_ids(a))
 #print(tokener.bos_token_id)
 # print(tokener.decode([4]))
@@ -17,5 +17,5 @@ b = tokener.convert_tokens_to_ids(b)  #词转化id
 pad = tokener.pad_token_id
 bos = tokener.bos_token_id
 end = tokener.end_token_id
-print(b)
-print(tokener[130004])
+print(pad)
+print(tokener.num_tokens)
