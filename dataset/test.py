@@ -15,7 +15,8 @@ b=tokener.tokenize(a,add_dummy_prefix=False)  #切词
 b = tokener.convert_tokens_to_ids(b)  #词转化id
 #b = tokener.decode([6]) #id 转为词把很多特殊token都省略了
 pad = tokener.pad_token_id
-bos = tokener.bos_token_id
+bos = tokener.bos_token_id#文本的开始
 end = tokener.end_token_id
-print(pad)
-print(tokener.num_tokens)
+eos = tokener.eos_token_id # End of Program
+print(end)
+print(tokener[end])
