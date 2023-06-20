@@ -32,12 +32,9 @@ def collate_fn(batch):
         label_ids.append(label_id)
     return {'input_ids': torch.tensor(input_ids), 'label_ids': torch.tensor(label_ids)}
 def predata(tokenize, data):
+    data = tokener.tokenize(data, add_dummy_prefix=False)                                           
+    data = ["<sop>"] + data + ["eop"]
     
-    data = tokener.tokenize(data, add_dummy_prefix=False) 
-
-
-    
-        
 class TextData(Dataset):
 
     def __init__(self, path, config=None):
