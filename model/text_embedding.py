@@ -19,7 +19,7 @@ class TextEmbeddings(nn.Module):
                                                 config.hidden_size)
         self.LayerNorm = LayerNorm(config.hidden_size, eps=1e-12)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
-        self.pmask = PadMasking(pad_idx=0)
+        self.pmask = PadMasking(config.pad)
         self.tmask = FutureMasking()
     def forward(self, input_ids):
         #if token_type_ids is None:

@@ -18,5 +18,5 @@ pad = tokener.pad_token_id
 bos = tokener.bos_token_id#文本的开始
 end = tokener.end_token_id
 eos = tokener.eos_token_id # End of Program
-print()
-print(tokener['<s>'])
+print(pad)
+print(tokener[3])

@@ -31,10 +31,17 @@ def collate_fn(batch):
         input_ids.append(input_id)
         label_ids.append(label_id)
     return {'input_ids': torch.tensor(input_ids), 'label_ids': torch.tensor(label_ids)}
-def predata(tokenize, data):
+
+def predata(tokenize, data, max_len = 2048):
     data = tokener.tokenize(data, add_dummy_prefix=False)                                           
     data = ["<sop>"] + data + ["eop"]
-    
+    if len(data) <= max_len:
+        return [data]
+    tmp = []
+    for i in range(len(data) // max_len + 1):
+        tmp.append(data[i * (max_len + 1):  (i + 1) * (max_len + 1)])
+    return tmp
+
 class TextData(Dataset):
 
     def __init__(self, path, config=None):
@@ -42,6 +49,7 @@ class TextData(Dataset):
         #print(path)
         self.root = path
         self.config = config
+        self.tokener = tokenization.SPTokenizer('./dataset/ice_text.model')
         self.data = []
         with open(path)as ff:
             for ll in ff:
@@ -50,17 +58,18 @@ class TextData(Dataset):
                     data = json.loads(ll.strip()).get('content','')
                     # for line in data.split('。'):
                     #     if line:
-                    self.data.append(data)
+                    data = predata(self.tokener, data, config.max_position_embeddings)
+                    for i in data:
+                        self.data.append(data)
                 except:
-                    pass
-        self.tokener = tokenization.SPTokenizer('./dataset/ice_text.model')
+                    print("get data error")
+    
     def __getitem__(self, index):
-        text = self.data[index]
-        b = self.tokener.tokenize(text,add_dummy_prefix=False) 
-        b = self.tokener.convert_tokens_to_ids(b) 
-        data = b[: self.config.max_position_embeddings+1]
-        input_ids = data[:-1]
-        label_ids = data[1:]
+        token = self.data[index]
+        #b = self.tokener.tokenize(text,add_dummy_prefix=False) 
+        token_id = self.tokener.convert_tokens_to_ids(token) 
+        input_ids = token_id[:-1]
+        label_ids = token_id[1:]
         return {'input_ids': input_ids, 'label_ids': label_ids}
 
     def __len__(self):
