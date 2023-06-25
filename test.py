@@ -16,6 +16,8 @@ from fairscale.nn.pipe.balance import balance_by_time
 partitions = torch.cuda.device_count()                                                               
 sample = torch.linspace(1,1024, 1024).view(2,512).to(torch.int)  
 
+
+
 #balance = balance_by_time(partitions, model, sample)                                                 
 # model = Pipe(model, balance)  
 
