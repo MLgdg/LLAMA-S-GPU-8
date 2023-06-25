@@ -6,11 +6,14 @@ import time
 from torch import nn 
 import traceback
 import json 
-from model.llama import LLAMA
+from model.text_embedding import TextEmbeddings
+from model.attention import Attention
+from model.transformer import ResidualAttentionBlock, FUCKHead
 from dataset import dataset
 from optimizer import opt
 from conf.config import DictToClass
-
+from fairscale.nn.pipe.balance import balance_by_time
+import fairscale
 epoch = 100
 CUDA=0
 loss_base = 100
@@ -33,8 +36,8 @@ model = torch.nn.Sequential(*model)
 balance = balance_by_time(partitions, model, sample)  
 print(balance)
 model = fairscale.nn.Pipe(model, balance=balance, chunks=8)
-loss_fn = torch.nn.CrossEntropyLoss(cfg.pad)
-traindata = torch.utils.data.DataLoader(dataset.TextData('./dongtai_v2tov4',cfg), batch_size=256,shuffle=True,num_workers=0,collate_fn=dataset.collate_fn,drop_last=True)
+loss_fn = torch.nn.CrossEntropyLoss(ignore_index=cfg.pad)
+traindata = torch.utils.data.DataLoader(dataset.TextData('./data/part-00499',cfg), batch_size=256,shuffle=True,num_workers=0,collate_fn=dataset.collate_fn,drop_last=True)
 
 
 optimizer, scheduler = opt.opt(model.parameters())

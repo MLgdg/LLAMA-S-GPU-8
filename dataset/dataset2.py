@@ -43,6 +43,16 @@ def predata(tokenize, data, max_len = 2048):
         tmp.append(data[i * (max_len + 1):  (i + 1) * (max_len + 1)])
     return tmp
 
+def get_lines(path):
+    name = os.path.basename(path)
+    nums = {}
+    i = 1
+    with open(path)as ff:
+        for ll in ff:
+            nums[i] = name
+            i += 1
+    return nums
+
 class TextData(Dataset):
 
     def __init__(self, path, config=None):
@@ -51,40 +61,55 @@ class TextData(Dataset):
         self.root = path
         self.config = config
         self.tokener = tokenization.SPTokenizer('./dataset/ice_text.model')
-        self.data = []
+        self._len = 0
+        self.dic_line = {}
+        data_list_names = os.listdir(self.config.part_path)
+        nums = []
         pool = Pool(processes=100)
-        tmp_pool_data = []
+        for i in range(data_list_names):
+            nums.append(pool.apply_async(func=self.get_lines, args=[os.join.path(self.config.part_path, i)]))
+        pool.close()
+        pool.join()
+        num = 1
+        num_file = 1
+        for n in nums:
+            self._len += len(n)
+
+            for k, v in n.items():
+                self.dic_line[num] = [v, num_file]
+                num +=1 
+            num_file = num_file + len(n)
+
+
+    def get_lines(self, path):
+        nums = 0
         with open(path)as ff:
             for ll in ff:
-                #print(ll)
-                try:
-                    data = json.loads(ll.strip()).get('content','')
-                    # for line in data.split('。'):
-                    #     if line:
-                    #data = predata(self.tokener, data, config.max_position_embeddings)
-                    tmp_pool_data.append(pool.apply_async(predata, (self.tokener, data, config.max_position_embeddings)))
-                    # for i in data:
-                    #     self.data.append(data)
-                except:
-                    print("get data error")
-            pool.close()
-            pool.join()
-        for result in tmp_pool_data:
-            data = result.get()
-            for i in data:
-                self.data.append(i) 
+                nums+=1
+        return nums
+
     
     def __getitem__(self, index):
-        token = self.data[index]
-        
-        #b = self.tokener.tokenize(text,add_dummy_prefix=False) 
-        token_id = self.tokener.convert_tokens_to_ids(token) 
+        file, line_index = self.dic_line[index]
+        num = 0
+        try:
+            with open (os.join.path(self.config.part_path, file))as ff:
+                for ll in ff:
+                    token_id = json.loads(ll.strip()).get('token_id',[])
+                    num += 1
+                    if num == (index - line_index):
+                        break
+        except:
+            token_id = []
+
+        #token = self.tokener.tokenize(text,add_dummy_prefix=False) 
+        #token_id = self.tokener.convert_tokens_to_ids(token) 
         input_ids = token_id[:-1]
         label_ids = token_id[1:]
         return {'input_ids': input_ids, 'label_ids': label_ids}
 
     def __len__(self):
-        return len(self.data)
+        return self._len
         
 
                 

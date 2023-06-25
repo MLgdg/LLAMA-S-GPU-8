@@ -56,7 +56,7 @@ class FUCKHead(nn.Module):
         super(FUCKHead, self).__init__()
         embed_shape = model_embeddings_weights.shape
         self.decoder = nn.Linear(embed_shape[1], embed_shape[0], bias=False)
-        self.set_embeddings_weights(model_embeddings_weights)
+        #self.set_embeddings_weights(model_embeddings_weights)
 
     def set_embeddings_weights(self, model_embeddings_weights):
         embed_shape = model_embeddings_weights.shape

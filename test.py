@@ -35,5 +35,5 @@ print(balance)
 model = fairscale.nn.Pipe(model, balance=balance, chunks=2)
 
 x = torch.linspace(1,1024, 1024).view(2,512).to(torch.int).cuda(0)
-a, b = model(x)
+a = model(x)
 print(a)
