@@ -2,8 +2,8 @@
 import tokenization as tokenization
 import tokenization_glm as tokenization
 import sentencepiece as spm
-tokener = tokenization.SPTokenizer('./ice_text.model')
-tokener2 = tokenization.TextTokenizer('./ice_text.model')
+tokener = tokenization.SPTokenizer('./baichuan.model')
+tokener2 = tokenization.TextTokenizer('./baichuan.model')
 import time
 
 a = "近期，SpaceX正在致力于进一步扩大对星际旅行的控制，\
@@ -86,4 +86,4 @@ bos = tokener.bos_token_id#文本的开始
 end = tokener.end_token_id
 eos = tokener.eos_token_id # End of Program
 print(pad)
-print(tokener[130005])
+print(tokener[31106])
